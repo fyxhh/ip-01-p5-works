@@ -4,9 +4,41 @@ let speedX = 2.5;
 let speedY = 2;
 let eyeMaxOffset = 12;
 
+// ===== 眨眼动画参数（点一下鼠标眨一次眼）=====
+let blinkStartTime = -1;      // 眨眼开始时刻（毫秒），-1 表示当前不在眨眼
+let blinkDuration = 220;      // 一次眨眼的完整时长（毫秒）
+let blinkCloseRatio = 0.45;   // 0.45 之前是闭眼过程，之后是睁眼过程
+let blinkMinScale = 0.06;     // 闭到最紧时眼睛的纵向缩放（0.06 约等于一条缝）
+let blinkLineOn = 0.55;       // 闭合程度超过这个值时补一条眼睑线
+
 function setup() {
   createCanvas(380, 570);
   noStroke();
+}
+
+// 点一下鼠标（或在手机上点一下屏幕）就眨一次眼
+function mousePressed() {
+  blinkStartTime = millis();
+}
+
+// 计算眨眼进度：0 = 完全睁开，1 = 完全闭上
+function blinkAmount() {
+  if (blinkStartTime < 0) {
+    return 0;
+  }
+  let t = (millis() - blinkStartTime) / blinkDuration;
+  if (t >= 1) {
+    blinkStartTime = -1;
+    return 0;
+  }
+  if (t < blinkCloseRatio) {
+    // 闭眼阶段：0 → 1，用 smoothstep 让收得快一点
+    let p = t / blinkCloseRatio;
+    return p * p * (3 - 2 * p);
+  }
+  // 睁眼阶段：1 → 0
+  let p = (t - blinkCloseRatio) / (1 - blinkCloseRatio);
+  return 1 - p * p * (3 - 2 * p);
 }
 
 function draw() {
@@ -88,6 +120,15 @@ function draw() {
     offY = constrain((dy / distVal) * eyeMaxOffset, -eyeMaxOffset, eyeMaxOffset);
   }
 
+  // 眨眼时把眼白、瞳孔、高光一起纵向压扁（以眼睛中心为轴）
+  let blink = blinkAmount();
+  let eyeScaleY = 1 - blink * (1 - blinkMinScale);
+
+  push();
+  translate(0, eyeCenterY);
+  scale(1, eyeScaleY);
+  translate(0, -eyeCenterY);
+
   fill(255);
   circle(leftEyeX, eyeCenterY, 42);
   circle(rightEyeX, eyeCenterY, 42);
@@ -100,11 +141,21 @@ function draw() {
   circle(leftEyeX + offX + 7, eyeCenterY + offY - 7, 12);
   circle(rightEyeX + offX + 7, eyeCenterY + offY - 7, 12);
 
+  pop();
+
   noFill();
   stroke(120, 120, 125);
   strokeWeight(3);
   circle(leftEyeX, eyeCenterY, 85);
   circle(rightEyeX, eyeCenterY, 85);
+
+  // 快闭上时补一条眼睑线，让"闭眼"更清楚
+  if (blink > blinkLineOn) {
+    stroke(115, 15, 35);
+    strokeWeight(3);
+    line(leftEyeX - 16, eyeCenterY, leftEyeX + 16, eyeCenterY);
+    line(rightEyeX - 16, eyeCenterY, rightEyeX + 16, eyeCenterY);
+  }
 
   noStroke();
   fill(175, 25, 75);
