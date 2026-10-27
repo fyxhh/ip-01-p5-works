@@ -8,7 +8,7 @@ let eyeMaxOffset = 12;
 let browMove = 8;        // 鼠标横移时眉毛最多位移多少像素
 let browBaseY = -34;     // 眉毛的基准位置（相对眼睛中心的纵向偏移）
 let browTopY = -40;      // 眉毛最高只能到哪（越负越靠上）
-let browBottomY = -29;   // 眉毛最低只能到哪（再往下就贴到眼睛了）
+let browBottomY = -24;   // 眉毛最低只能到哪（用户指定：到眼白上缘附近，留 3px 不重叠）
 
 // ===== 眨眼动画参数（点一下鼠标眨一次眼）=====
 let blinkStartTime = -1;      // 眨眼开始时刻（毫秒），-1 表示当前不在眨眼
