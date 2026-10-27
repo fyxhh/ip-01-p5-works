@@ -4,6 +4,12 @@ let speedX = 2.5;
 let speedY = 2;
 let eyeMaxOffset = 12;
 
+// ===== 眉毛跟随的界限（防止鼠标移到最左/最右时眉毛压到眼睛上）=====
+let browMove = 8;        // 鼠标横移时眉毛最多位移多少像素
+let browBaseY = -34;     // 眉毛的基准位置（相对眼睛中心的纵向偏移）
+let browTopY = -40;      // 眉毛最高只能到哪（越负越靠上）
+let browBottomY = -29;   // 眉毛最低只能到哪（再往下就贴到眼睛了）
+
 // ===== 眨眼动画参数（点一下鼠标眨一次眼）=====
 let blinkStartTime = -1;      // 眨眼开始时刻（毫秒），-1 表示当前不在眨眼
 let blinkDuration = 220;      // 一次眨眼的完整时长（毫秒）
@@ -163,7 +169,10 @@ function draw() {
   arc(cx, 400, 70, 35, 0, PI);
 
   fill(0);
-  let browOffset = map(mouseX, 0, width, -8, 8);
-  arc(leftEyeX, eyeCenterY - 32 + browOffset, 36, 18, PI, 0);
-  arc(rightEyeX, eyeCenterY - 32 - browOffset, 36, 18, PI, 0);
+  // 眉毛跟随鼠标左右抬高/压低，但用 constrain 卡在上下界限内，不会压到眼睛
+  let browMoveVal = map(mouseX, 0, width, -browMove, browMove);
+  let leftBrowY = constrain(eyeCenterY + browBaseY + browMoveVal, eyeCenterY + browTopY, eyeCenterY + browBottomY);
+  let rightBrowY = constrain(eyeCenterY + browBaseY - browMoveVal, eyeCenterY + browTopY, eyeCenterY + browBottomY);
+  arc(leftEyeX, leftBrowY, 36, 18, PI, 0);
+  arc(rightEyeX, rightBrowY, 36, 18, PI, 0);
 }
